@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import { MapUsecase } from '@/module/map/usecase/mapUsecase'
 import { PropertyForm } from '@/components/property-form'
 import { MapService } from '@/module/map/service/mapService'
@@ -10,19 +9,17 @@ import { PropertyData } from '@/module/map/entity/PropertyData'
 import { Spinner } from '@/components/ui/spinner'
 import supabase from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
-import './styles.css'
+import dynamic from 'next/dynamic'
 
-// Fix Leaflet default marker icon issue
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Dynamically import the Map components with ssr: false
+const MapWithNoSSR = dynamic(() => import('@/components/map'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center items-center h-[600px] w-full bg-gray-100 rounded-lg">
+      <Spinner className="w-8 h-8" />
+    </div>
+  )
+})
 
 export default function MapPage() {
   const [properties, setProperties] = useState<PropertyData[]>([])
@@ -105,8 +102,6 @@ export default function MapPage() {
       console.error('Error deleting property:', error)
     } finally {
       setIsDeleting(false)
-      console.log('isDeleting :>>', isDeleting);
-      
     }
   }
 
@@ -179,66 +174,13 @@ export default function MapPage() {
         </div>
       ) : (
         <div className="h-[600px] w-full rounded-lg overflow-hidden">
-          <MapContainer
-            center={mapCenter}
-            zoom={12}
-            style={{ width: '100%', height: '100%' }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {filteredAndSortedProperties.map((property) => {
-              const customIcon = new L.DivIcon({
-                className: 'custom-marker',
-                html: `<div class="bg-black bg-opacity-75 text-white px-2 py-1 rounded-lg font-semibold">Rp ${property.price.toLocaleString()}</div>`,
-                iconSize: [60, 30],
-                iconAnchor: [30, 30]
-              });
-              return (
-                <Marker
-                  key={property.id}
-                  position={[property.latitude, property.longitude]}
-                  icon={customIcon}
-                  eventHandlers={{
-                    mouseover: (e) => e.target.openPopup()
-                  }}
-                >
-                  <Popup className="property-popup">
-                    <div className="p-4 max-w-sm transition-all duration-300 ease-in-out">
-                      {property.image_url && (
-                        <div className="relative w-[260px] h-[160px] rounded-xl overflow-hidden shadow-md">
-                        <Image
-                          src={property.image_url}
-                          fill
-                          alt="Property preview"
-                          sizes="(max-width: 768px) 100vw, 260px"
-                          className="object-cover"
-                        />
-                      </div>
-                      )}
-                      <h2 className="text-lg font-semibold m-2">{property.title}</h2>
-                      <p className="text-gray-600 mb-2">{property.description}</p>
-                      <p className="font-semibold text-lg">Rp {property.price.toLocaleString()}</p>
-                      <div className="mt-4 flex justify-end space-x-2">
-                        <PropertyForm
-                          property={property}
-                          onSubmit={(data) => handleUpdateProperty(property.id, data)}
-                        />
-                        <button
-                          onClick={() => handleDeleteProperty(property.id)}
-                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? 'Deleting...' : 'Delete'}
-                        </button>
-                      </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
-          </MapContainer>
+          <MapWithNoSSR 
+            mapCenter={mapCenter} 
+            properties={filteredAndSortedProperties} 
+            handleUpdateProperty={handleUpdateProperty}
+            handleDeleteProperty={handleDeleteProperty}
+            isDeleting={isDeleting}
+          />
         </div>
       )}
     </div>
