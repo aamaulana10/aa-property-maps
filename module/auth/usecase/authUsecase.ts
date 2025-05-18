@@ -7,4 +7,8 @@ export class AuthUsecase  {
     async execute(email: string): Promise<AuthResult> {
       return this.authRepo.sendMagicLink(email)
     }
+
+    async handleAuthCallback(): Promise<AuthResult> {
+      return this.authRepo.handleAuthCallback()
+    }
   }
