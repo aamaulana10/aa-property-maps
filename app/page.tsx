@@ -5,11 +5,12 @@ import supabase from "@/lib/supabase";
 import MapPage from "./map/page";
 
 import dotenv from "dotenv"
+import { User } from "@supabase/supabase-js";
 dotenv.config()
 
 export default function Home() {
 
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const getUser = async () => {

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
 import { MapUsecase } from '@/module/map/usecase/mapUsecase'
@@ -11,6 +11,7 @@ import { MapService } from '@/module/map/service/mapService'
 import { PropertyData } from '@/module/map/entity/PropertyData'
 import { Spinner } from '@/components/ui/spinner'
 import supabase from '@/lib/supabase'
+import { User } from '@supabase/supabase-js'
 
 export default function MapPage() {
   const [properties, setProperties] = useState<PropertyData[]>([])
@@ -25,7 +26,7 @@ export default function MapPage() {
   const service = new MapService()
   const usecase = new MapUsecase(service)
 
-  var [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null >(null)
 
   useEffect(() => {
     const init = async () => {
@@ -51,7 +52,7 @@ export default function MapPage() {
   const handleGetProperties = async () => {
     setIsLoading(true)
     try {
-      const mapResult = await usecase.getListProperty(user.id)
+      const mapResult = await usecase.getListProperty(user?.id || '')
       if (mapResult) setProperties(mapResult)
     } catch (error) {
       console.error('Error fetching properties:', error)
@@ -63,7 +64,7 @@ export default function MapPage() {
   const handleAddProperty = async (data: PropertyData) => {
     setIsAdding(true)
     try {
-      const newProperty = await usecase.createProperty(data, user.id)
+      const newProperty = await usecase.createProperty(data, user?.id || '')
       setProperties([...properties, newProperty])
     } catch (error) {
       console.error('Error adding property:', error)
@@ -74,7 +75,7 @@ export default function MapPage() {
 
   const handleUpdateProperty = async (id: string, data: PropertyData) => {
     try {
-      const updatedProperty = await usecase.updateProperty(id, data, user.id)
+      const updatedProperty = await usecase.updateProperty(id, data, user?.id || '')
       handleGetProperties();
       setProperties(properties.map(prop => 
         prop.id === id ? updatedProperty : prop
@@ -87,12 +88,14 @@ export default function MapPage() {
   const handleDeleteProperty = async (id: string) => {
     setIsDeleting(true)
     try {
-      await usecase.deleteProperty(id, user.id)
+      await usecase.deleteProperty(id, user?.id || '')
       setProperties(properties.filter(prop => prop.id !== id))
     } catch (error) {
       console.error('Error deleting property:', error)
     } finally {
       setIsDeleting(false)
+      console.log('isDeleting :>>', isDeleting);
+      
     }
   }
 
