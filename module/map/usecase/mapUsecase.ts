@@ -12,6 +12,10 @@ export class MapUsecase {
         return this.service.createProperty(data, userId)
     }
 
+    async updateProperty(id:string, data: PropertyData, userId: string): Promise<PropertyData> {
+        return this.service.updateProperty(id, data, userId)
+    }
+
     async deleteProperty(id: string, userId: string) {
         return this.service.deleteProperty(id, userId)
     }
