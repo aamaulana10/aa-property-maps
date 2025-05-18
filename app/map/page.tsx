@@ -10,12 +10,12 @@ import { Spinner } from '@/components/ui/spinner'
 import supabase from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 import dynamic from 'next/dynamic'
+import { PropertyList } from '@/components/property-list'
 
-// Dynamically import the Map components with ssr: false
 const MapWithNoSSR = dynamic(() => import('@/components/map'), {
   ssr: false,
   loading: () => (
-    <div className="flex justify-center items-center h-[600px] w-full bg-gray-100 rounded-lg">
+    <div className="flex relative z-0 justify-center items-center h-[600px] w-full bg-gray-100 rounded-lg">
       <Spinner className="w-8 h-8" />
     </div>
   )
@@ -27,7 +27,10 @@ export default function MapPage() {
   const [isAdding, setIsAdding] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState({ min: 0, max: Infinity })
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number | undefined }>({
+    min: 0,
+    max: undefined
+  })
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'title'>('price-asc')
   const mapCenter: [number, number] = [-6.2088, 106.8456] // Jakarta center
 
@@ -109,7 +112,7 @@ export default function MapPage() {
     .filter(prop => 
       (prop.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
       (prop.price || 0) >= priceRange.min &&
-      (prop.price || 0) <= priceRange.max
+      (priceRange.max === undefined || (prop.price || 0) <= priceRange.max)
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -128,7 +131,9 @@ export default function MapPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Your Properties</h1>
-        <PropertyForm onSubmit={handleAddProperty} isLoading={isAdding} />
+        <div className='z-[9999]'>
+            <PropertyForm onSubmit={handleAddProperty} isLoading={isAdding} />
+        </div>
       </div>
 
       <div className="mb-6 space-y-4">
@@ -163,10 +168,26 @@ export default function MapPage() {
             type="number"
             placeholder="Max price"
             className="px-4 py-2 border rounded-lg w-40"
-            onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) || Infinity }))}
+            onChange={(e) => {
+              const value = e.target.value
+              setPriceRange(prev => ({
+                ...prev,
+                max: value === "" ? undefined : Number(value)
+              }))
+            }}
           />
         </div>
       </div>
+
+      <PropertyList
+        properties={filteredAndSortedProperties}
+        onSelect={(property) => {
+          console.log("Selected Property", property)
+        }}
+        handleUpdateProperty={handleUpdateProperty}
+        handleDeleteProperty={handleDeleteProperty}
+        isDeleting={isDeleting}
+      />
 
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[200px]">

@@ -39,6 +39,13 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const lat = parseFloat(inputLat)
+    const lng = parseFloat(inputLng)
+
+  if (isNaN(lat) || isNaN(lng)) {
+    alert("Latitude dan Longitude should be valid")
+    return
+  }
     onSubmit(formData)
     setIsOpen(false)
   }
@@ -57,7 +64,7 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
           {property ? "Edit" : "Add Property"}
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="z-[2000]">
         <DialogHeader>
           <DialogTitle>{property ? "Edit Property" : "Add New Property"}</DialogTitle>
         </DialogHeader>
