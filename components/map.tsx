@@ -28,8 +28,17 @@ interface MapProps {
 }
 
 const Map = ({ mapCenter, properties, handleUpdateProperty, handleDeleteProperty, isDeleting }: MapProps) => {
+  const mapRef = React.useRef<L.Map>(null);
+
+  React.useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setView(mapCenter, 12);
+    }
+  }, [mapCenter]);
+
   return (
     <MapContainer
+      ref={mapRef}
       center={mapCenter}
       zoom={12}
       style={{ width: '100%', height: '100%' }}

@@ -31,16 +31,18 @@ export function LoginForm({ onSubmit, loading, isSent }: LoginFormProps) {
     <div className={cn("flex flex-col gap-6")}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Selamat datang kembali</CardTitle>
-          <CardDescription>
-            {isSent ? "Silakan cek email Anda untuk link login" : "Masukkan email Anda untuk menerima magic link"}
+        <CardTitle className="text-xl">Welcome to Your Property Dashboard</CardTitle>
+       <CardDescription>
+          {isSent
+           ? "Please check your email for the login link."
+           : "Enter your email address to receive a magic login link."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -52,27 +54,27 @@ export function LoginForm({ onSubmit, loading, isSent }: LoginFormProps) {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading || isSent}>
-                {loading ? "Mengirim..." : isSent ? "Link terkirim" : "Kirim magic link"}
+                {loading ? "Sending..." : isSent ? "Link Sent" : "Send Magic Link"}
               </Button>
               {isSent && (
-                <div className="text-center text-sm text-muted-foreground">
-                  Tidak menerima email?{" "}
-                  <button
-                    type="submit"
-                    className="text-primary underline-offset-4 hover:underline"
-                    onClick={() => onSubmit(email)}
-                  >
-                    Kirim ulang
-                  </button>
-                </div>
-              )}
+                  <div className="text-center text-sm text-muted-foreground">
+                    Didnt receive the email?{" "}
+                    <button
+                      type="submit"
+                      className="text-primary underline-offset-4 hover:underline"
+                      onClick={() => onSubmit(email)}
+                    >
+                      Resend Link
+                    </button>
+                  </div>
+                )}
             </div>
           </form>
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By continuing, you agree to our <a href="#">Terms of Service</a> and{" "}
+        <a href="#">Privacy Policy</a>.
       </div>
     </div>
   )

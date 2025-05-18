@@ -32,7 +32,7 @@ export default function MapPage() {
     max: undefined
   })
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'title'>('price-asc')
-  const mapCenter: [number, number] = [-6.2088, 106.8456] // Jakarta center
+  const [selectedLocation, setSelectedLocation] = useState<[number, number]>([-6.2088, 106.8456]) // Jakarta center
 
   const service = new MapService()
   const usecase = new MapUsecase(service)
@@ -182,7 +182,7 @@ export default function MapPage() {
       <PropertyList
         properties={filteredAndSortedProperties}
         onSelect={(property) => {
-          console.log("Selected Property", property)
+          setSelectedLocation([property.latitude, property.longitude])
         }}
         handleUpdateProperty={handleUpdateProperty}
         handleDeleteProperty={handleDeleteProperty}
@@ -196,7 +196,7 @@ export default function MapPage() {
       ) : (
         <div className="h-[600px] w-full rounded-lg overflow-hidden">
           <MapWithNoSSR 
-            mapCenter={mapCenter} 
+            mapCenter={selectedLocation} 
             properties={filteredAndSortedProperties} 
             handleUpdateProperty={handleUpdateProperty}
             handleDeleteProperty={handleDeleteProperty}
