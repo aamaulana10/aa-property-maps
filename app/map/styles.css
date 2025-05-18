@@ -1,0 +1,33 @@
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.custom-marker div {
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.custom-marker:hover div {
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.property-popup .leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 0;
+  overflow: hidden;
+}
+
+.property-popup .leaflet-popup-content {
+  margin: 0;
+  padding: 0;
+}
+
+.property-popup .leaflet-popup-tip-container {
+  margin-top: -1px;
+}

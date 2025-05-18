@@ -2,9 +2,7 @@
 
 import React from 'react'
 import { useEffect, useState } from "react"
-import { Card } from "@/components/ui/card"
 import Image from "next/image"
-import Link from "next/link"
 import { MapUsecase } from '@/module/map/usecase/mapUsecase'
 import { PropertyForm } from '@/components/property-form'
 import { MapService } from '@/module/map/service/mapService'
@@ -12,21 +10,34 @@ import { PropertyData } from '@/module/map/entity/PropertyData'
 import { Spinner } from '@/components/ui/spinner'
 import supabase from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import './styles.css'
+
+// Fix Leaflet default marker icon issue
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function MapPage() {
   const [properties, setProperties] = useState<PropertyData[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  // Add new states for search, filter, and sort
   const [searchTerm, setSearchTerm] = useState("")
   const [priceRange, setPriceRange] = useState({ min: 0, max: Infinity })
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'title'>('price-asc')
+  const mapCenter: [number, number] = [-6.2088, 106.8456] // Jakarta center
 
   const service = new MapService()
   const usecase = new MapUsecase(service)
 
-  const [user, setUser] = useState<User | null >(null)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -125,7 +136,6 @@ export default function MapPage() {
         <PropertyForm onSubmit={handleAddProperty} isLoading={isAdding} />
       </div>
 
-      {/* Add search, filter, and sort controls */}
       <div className="mb-6 space-y-4">
         <div className="flex gap-4">
           <input
@@ -168,41 +178,67 @@ export default function MapPage() {
           <Spinner className="w-8 h-8" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredAndSortedProperties && filteredAndSortedProperties.map((prop, index) => (
-            <div key={prop?.id || index} className="relative group overflow-hidden rounded-lg">
-              <Link
-                href={`https://maps.google.com/?q=${prop.latitude},${prop.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Card className="transform transition-all duration-300 hover:scale-105 cursor-pointer border-0 bg-transparent">
-                  <div className="relative">
-                    <Image
-                      src={prop.image_url || 'https://images.pexels.com/photos/29929930/pexels-photo-29929930/free-photo-of-orang-fritzlar.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'}
-                      alt="Property"
-                      width={400}
-                      height={250}
-                      className="rounded-lg object-cover w-full h-[250px]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <p className="text-white font-bold text-xl mb-2">  Rp {(prop.price || 0).toLocaleString()}</p>
-                      <p className="text-white/90 text-sm truncate">{prop.title || "Beautiful Property"}</p>
+        <div className="h-[600px] w-full rounded-lg overflow-hidden">
+          <MapContainer
+            center={mapCenter}
+            zoom={12}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {filteredAndSortedProperties.map((property) => {
+              const customIcon = new L.DivIcon({
+                className: 'custom-marker',
+                html: `<div class="bg-black bg-opacity-75 text-white px-2 py-1 rounded-lg font-semibold">Rp ${property.price.toLocaleString()}</div>`,
+                iconSize: [60, 30],
+                iconAnchor: [30, 30]
+              });
+              return (
+                <Marker
+                  key={property.id}
+                  position={[property.latitude, property.longitude]}
+                  icon={customIcon}
+                  eventHandlers={{
+                    mouseover: (e) => e.target.openPopup()
+                  }}
+                >
+                  <Popup className="property-popup">
+                    <div className="p-4 max-w-sm transition-all duration-300 ease-in-out">
+                      {property.image_url && (
+                        <div className="relative w-[260px] h-[160px] rounded-xl overflow-hidden shadow-md">
+                        <Image
+                          src={property.image_url}
+                          fill
+                          alt="Property preview"
+                          sizes="(max-width: 768px) 100vw, 260px"
+                          className="object-cover"
+                        />
+                      </div>
+                      )}
+                      <h2 className="text-lg font-semibold m-2">{property.title}</h2>
+                      <p className="text-gray-600 mb-2">{property.description}</p>
+                      <p className="font-semibold text-lg">Rp {property.price.toLocaleString()}</p>
+                      <div className="mt-4 flex justify-end space-x-2">
+                        <PropertyForm
+                          property={property}
+                          onSubmit={(data) => handleUpdateProperty(property.id, data)}
+                        />
+                        <button
+                          onClick={() => handleDeleteProperty(property.id)}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </Link>
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <PropertyForm
-                  property={prop}
-                  onSubmit={(data) => handleUpdateProperty(prop.id, data)}
-                  onDelete={() => handleDeleteProperty(prop.id)}
-                />
-              </div>
-            </div>
-          ))}
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MapContainer>
         </div>
       )}
     </div>
