@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Property Management System
 
-## Getting Started
+A modern property management system built with Next.js, Supabase, and Express.js. This application allows users to manage property listings with features like property creation, updating, deletion, and searching.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🏠 Property Management (CRUD operations)
+- 🔍 Search and Filter Properties
+- 💰 Price Range Filtering
+- 🗺️ Google Maps Integration
+- 🔐 Authentication with Supabase
+- 📱 Responsive Design
+
+## Tech Stack
+
+- **Frontend**: Next.js 14 with App Router
+- **Backend**: Express.js
+- **Database**: Supabase
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+
+## Project Structure
+
+```plaintext
+aa-property-maps/
+├── app/                    # Next.js app directory
+│   ├── login/             # Login page
+│   ├── map/               # Property management page
+│   └── page.tsx           # Main page
+├── components/            # Reusable components
+│   ├── property-form/     # Property form component
+│   └── ui/               # UI components
+├── lib/                   # Utility functions
+│   └── supabase.ts       # Supabase client
+├── module/                # Business logic modules
+│   ├── auth/             # Authentication module
+│   └── map/              # Property management module
+│       ├── entity/       # Data entities
+│       ├── repository/   # Data access layer
+│       ├── service/      # Business logic
+│       └── usecase/      # Use cases
+└── public/               # Static assets
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

@@ -4,6 +4,9 @@ import LoginPage from "./login/page";
 import supabase from "@/lib/supabase";
 import MapPage from "./map/page";
 
+import dotenv from "dotenv"
+dotenv.config()
+
 export default function Home() {
 
   const [user, setUser] = useState<any>(null)
