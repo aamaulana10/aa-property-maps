@@ -27,19 +27,20 @@ export default function MapPage() {
   const userId = "6cfb6a9e-bcef-42dc-8b9b-3702c7ec788a"
 
   useEffect(() => {
-    const fetchProperties = async () => {
-      setIsLoading(true)
-      try {
-        const mapResult = await usecase.getListProperty(userId)
-        if (mapResult) setProperties(mapResult)
-      } catch (error) {
-        console.error('Error fetching properties:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchProperties()
+    handleGetProperties()
   }, [])
+
+  const handleGetProperties = async () => {
+    setIsLoading(true)
+    try {
+      const mapResult = await usecase.getListProperty(userId)
+      if (mapResult) setProperties(mapResult)
+    } catch (error) {
+      console.error('Error fetching properties:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleAddProperty = async (data: PropertyData) => {
     setIsAdding(true)
@@ -54,14 +55,15 @@ export default function MapPage() {
   }
 
   const handleUpdateProperty = async (id: string, data: PropertyData) => {
-    // try {
-    //   const updatedProperty = await usecase.update(id, data)
-    //   setProperties(properties.map(prop => 
-    //     prop.id === id ? updatedProperty : prop
-    //   ))
-    // } catch (error) {
-    //   console.error('Error updating property:', error)
-    // }
+    try {
+      const updatedProperty = await usecase.updateProperty(id, data, userId)
+      handleGetProperties();
+      setProperties(properties.map(prop => 
+        prop.id === id ? updatedProperty : prop
+      ))
+    } catch (error) {
+      console.error('Error updating property:', error)
+    }
   }
 
   const handleDeleteProperty = async (id: string) => {
@@ -76,12 +78,11 @@ export default function MapPage() {
     }
   }
 
-  // Add new function to filter and sort properties
   const filteredAndSortedProperties = properties
     .filter(prop => 
-      prop.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      prop.price >= priceRange.min &&
-      prop.price <= priceRange.max
+      (prop.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
+      (prop.price || 0) >= priceRange.min &&
+      (prop.price || 0) <= priceRange.max
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -147,8 +148,8 @@ export default function MapPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredAndSortedProperties.map((prop) => (
-            <div key={prop.id} className="relative group overflow-hidden rounded-lg">
+          {filteredAndSortedProperties && filteredAndSortedProperties.map((prop, index) => (
+            <div key={prop?.id || index} className="relative group overflow-hidden rounded-lg">
               <Link
                 href={`https://maps.google.com/?q=${prop.latitude},${prop.longitude}`}
                 target="_blank"
@@ -158,7 +159,7 @@ export default function MapPage() {
                 <Card className="transform transition-all duration-300 hover:scale-105 cursor-pointer border-0 bg-transparent">
                   <div className="relative">
                     <Image
-                      src={prop.image_url}
+                      src={prop.image_url || 'https://images.pexels.com/photos/29929930/pexels-photo-29929930/free-photo-of-orang-fritzlar.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'}
                       alt="Property"
                       width={400}
                       height={250}
@@ -166,7 +167,7 @@ export default function MapPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <p className="text-white font-bold text-xl mb-2">Rp {prop.price.toLocaleString()}</p>
+                      <p className="text-white font-bold text-xl mb-2">  Rp {(prop.price || 0).toLocaleString()}</p>
                       <p className="text-white/90 text-sm truncate">{prop.title || "Beautiful Property"}</p>
                     </div>
                   </div>

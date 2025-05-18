@@ -23,6 +23,8 @@ type PropertyFormProps = {
 
 export function PropertyForm({ property, onSubmit, onDelete, isLoading }: PropertyFormProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [inputLat, setInputLat] = useState(String(property?.latitude || 0))
+  const [inputLng, setInputLng] = useState(String(property?.longitude || 0))
   const [formData, setFormData] = useState<PropertyData>(
     property ?? {
         id: "",
@@ -84,7 +86,7 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
             <Label htmlFor="price">Price</Label>
             <Input
               id="price"
-              value={formData.price.toString()}
+              value={(formData.price || 0).toString()}
               onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
               placeholder="Rp 800 juta"
               required
@@ -96,7 +98,7 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
               id="image"
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              placeholder="/dummy1.jpg"
+              placeholder="Your the best image url"
               required
             />
           </div>
@@ -105,11 +107,16 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
               <Label htmlFor="lat">Latitude</Label>
               <Input
                 id="lat"
-                type="number"
-                step="any"
-                value={formData.latitude}
-                onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) })}
-                placeholder="-6.2"
+                type="text"
+                value={inputLat}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setInputLat(value)
+                  if (value && !isNaN(parseFloat(value))) {
+                    setFormData({ ...formData, latitude: parseFloat(value) })
+                  }
+                }}
+                placeholder="-6.2088"
                 required
               />
             </div>
@@ -117,11 +124,16 @@ export function PropertyForm({ property, onSubmit, onDelete, isLoading }: Proper
               <Label htmlFor="lng">Longitude</Label>
               <Input
                 id="lng"
-                type="number"
-                step="any"
-                value={formData.longitude}
-                onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) })}
-                placeholder="106.8"
+                type="text"
+                value={inputLng}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setInputLng(value)
+                  if (value && !isNaN(parseFloat(value))) {
+                    setFormData({ ...formData, longitude: parseFloat(value) })
+                  }
+                }}
+                placeholder="106.8456"
                 required
               />
             </div>
