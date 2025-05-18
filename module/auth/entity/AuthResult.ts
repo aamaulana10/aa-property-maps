@@ -1,4 +1,4 @@
-export type AuthResult = {
-    success: boolean
-    message: string
+export interface AuthResult {
+  success: boolean
+  message: string
 }

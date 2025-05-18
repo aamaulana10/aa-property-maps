@@ -21,6 +21,7 @@ export default function LoginPage() {
     console.log('result :>> ', result);
     
     setLoading(false)
+    setIsSent(true)
   }
 
   return (
